@@ -13,8 +13,6 @@ from rouge import Rouge
 
 
 def normalize_answer(s):
-    """Lower text and remove punctuation, articles and extra whitespace."""
-
     def remove_articles(text):
         return re.sub(r"\b(a|an|the)\b", " ", text)
 
@@ -159,10 +157,6 @@ import regex
 
 
 def normalize_answer2(s: str) -> str:
-    """Normalization from the SQuAD evaluation script.
-
-    See https://worksheets.codalab.org/rest/bundles/0x6b567e1cf2e041ec80d7098f031c5c9e/contents/blob/
-    """
 
     def remove_articles(text):
         return regex.sub(r"\b(a|an|the)\b", " ", text)
@@ -212,7 +206,6 @@ def evaluate_match(pred_list, gt_list, truncate_pred=True, logger=None):
             gts = [gts]
         metrics["qa_f1_score"] += eval_qa_f1_score(pred, gts)
         metrics["best_subspan_em"] += best_subspan_em(pred, gts)
-    # average
     for metric_name, score in metrics.items():
         metrics[metric_name] = score * 100 / len(pred_list)
         # print(f"{metric_name}: {metrics[metric_name]:.3f}")
