@@ -1,6 +1,7 @@
 # Nano-Memory
 
-Implementation for paper: Back to Basics: Let Conversational Agents Remember with Just Retrieval and Generation
+**Back to Basics: Let Conversational Agents Remember with Just Retrieval and Generation**
+
 
 ## Dataset
 
@@ -29,15 +30,20 @@ We evaluate our method on four publicly available long-context conversation benc
  ```
 
 ## Environment
+
+```bash
     conda create -n nano-memory python=3.9
     conda activate nano-memory
-    pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 --index-url https://download.pytorch.org/whl/cu121
+    pip install torch==2.3.1 torchvision==0.18.1 torchaudio==2.3.1 \
+    --index-url https://download.pytorch.org/whl/cu121
+    
     pip install -r requirements.txt
+
+```
 
 ## Experiments
 
-
-### Memory Retrieval
+### Memory Retrieval(TIR)
 
 ```bash
 python3 emb.py
@@ -61,16 +67,20 @@ python generation.py --dataset locomo10 --retriever contriever --model_name_or_p
  ```
 
 
-#### Evaluation
+### Evaluation
 
-Evaluating with GPT4o-as-Judge:
+GPT-4o-as-Judge (4o-J):
 
 ```bash
-python 4o_J.py --model_name_or_path gpt-4o --eval_file locomo10-contriever-argmax-gpt-4o-mini-2024-07-18-topk_3.jsonl
+python evaluate_judge.py \
+    --eval_file locomo10-contriever-argmax-gpt-4o-mini-2024-07-18-topk_3.jsonl \
+    --model_name_or_path gpt-4o
 
 ```
 
-Evaluating different query types:
+Per-query-type breakdown:
+
 ```python
-python eval_query_type.py --eval_file logs/generation_logs/locomo10-contriever-argmax-gpt-4o-mini-2024-07-18-topk_3.jsonl
+python eval_query_type.py \
+    --eval_file logs/generation_logs/locomo10-contriever-argmax-gpt-4o-mini-2024-07-18-topk_3.jsonl
 ```
