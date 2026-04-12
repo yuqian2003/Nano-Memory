@@ -50,18 +50,18 @@ python3 emb.py
  ```
 
 ```bash
-python3 run_retrieval.py --dataset locomo10 --retriever contriever --method argmax
+python3 retrieval.py --dataset locomo10 --retriever contriever --method argmax
  ```
 
 Change the --dataset parameter to  `locomo10` `longmemeval_s` `longmemeval_m` `LongMTBench+` for experiments on other datasets.
 
-Change the --retriever parameter to  `contriever` `mpnet` `minilm` for experiments on other retrievers.
+Change the --retriever parameter to  `contriever` `mpnet` `minilm` for experiments for experiments on other retrievers.
 
 
 ### Memory Generation  (DQR)
 
 ```bash
-python generation.py --dataset locomo10 --retriever contriever --model_name_or_path gpt-4o-mini-2024-07-18 --topk 3 --method memgas
+python gen.py --dataset locomo10 --retriever contriever --model_name_or_path gpt-4o-mini-2024-07-18 --topk 3 --method memgas
  ```
 
 
