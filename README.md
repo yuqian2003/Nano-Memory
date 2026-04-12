@@ -60,8 +60,6 @@ Change the --retriever parameter to  `contriever` `mpnet` `minilm` for experimen
 
 ### Memory Generation  (DQR)
 
-To conduct QA experiements in Tab.1, run:
-
 ```bash
 python generation.py --dataset locomo10 --retriever contriever --model_name_or_path gpt-4o-mini-2024-07-18 --topk 3 --method memgas
  ```
