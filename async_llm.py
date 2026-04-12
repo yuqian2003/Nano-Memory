@@ -3,8 +3,8 @@ import aiohttp
 
 
 async def create_completion(session, prompt, model="gpt-4o-mini-2024-07-18"):
-    API_KEY = 'sk-xWnLMDe1yLYY7A7f1Q3gA8uokKlPfe8DomakThnJ15W391ok'
-    BASE_URL = 'https://yunwu.ai/v1'
+    API_KEY = 'YOUR_API_KEY'
+    BASE_URL = 'YOUR_API_BASE'
     headers = {
         "Authorization": f"Bearer {API_KEY}",
         "Content-Type": "application/json",
@@ -16,7 +16,6 @@ async def create_completion(session, prompt, model="gpt-4o-mini-2024-07-18"):
                 json={
                     "model": model,
                     "max_tokens": 4000,
-                    #"max_tokens": 500,
                     "temperature": 0,
                     # "frequency_penalty": 0.05,
                     # "presence_penalty": 0.0,
@@ -32,7 +31,7 @@ async def create_completion(session, prompt, model="gpt-4o-mini-2024-07-18"):
                     return result['choices'][0]['message']['content']
                 else:
                     error_text = await response.text()
-                    print(f"请求失败，状态码: {response.status}, 错误信息: {error_text}")
+                    print(f"fail: {response.status}, wrong info: {error_text}")
                     retry += 1
                     if retry < 10:
                         await asyncio.sleep(1)
@@ -48,17 +47,7 @@ async def create_completion(session, prompt, model="gpt-4o-mini-2024-07-18"):
                 return f"[Exception: {str(e)}]"
 
 async def run_async(prompts, model="gpt-4o-mini-2024-07-18", max_concurrent=2000):
-    """
-    异步批量处理 prompts（串行执行，max_concurrent=1）
-    
-    Args:
-        prompts: 待处理的 prompt 列表
-        model: 模型名称
-        max_concurrent: 最大并发数，默认1（串行）
-    
-    Returns:
-        responses: 响应内容列表
-    """
+
     semaphore = asyncio.Semaphore(max_concurrent)
     
     async def create_completion_with_limit(session, prompt, model):
