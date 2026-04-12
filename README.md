@@ -36,11 +36,12 @@ We evaluate our method on four publicly available long-context conversation benc
 
 ## Experiments
 
+
+### Memory Retrieval
+
 ```bash
 python3 emb.py
  ```
-
-### Memory Retrieval
 
 ```bash
 python3 run_retrieval.py --dataset locomo10 --retriever contriever --method argmax
