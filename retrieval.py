@@ -1,22 +1,21 @@
 import os
 import sys
+import json
+import torch
+import argparse
+import numpy as np
+from tqdm import tqdm
+from emb import emb_rawdata
+import multiprocessing as mp
+from functools import partial
+import torch.nn.functional as F
+from eval_utils import evaluate_retrieval
+from sklearn.preprocessing import normalize
+from transformers import AutoModel, AutoTokenizer
 current_dir = os.path.dirname(os.path.abspath(__file__))
 src_path = os.path.abspath(os.path.join(current_dir, "../"))
 sys.path.insert(0, src_path)
 sys.path.insert(0, os.path.join(src_path, "evaluation/retrieval"))
-import multiprocessing as mp
-from functools import partial
-import json
-import time
-from tqdm import tqdm
-import numpy as np
-import torch
-import torch.nn.functional as F
-import argparse
-from transformers import AutoModel, AutoTokenizer
-from sklearn.preprocessing import normalize
-from eval_utils import evaluate_retrieval
-from emb import emb_rawdata
 
 
 def parse_args():
@@ -29,10 +28,8 @@ def parse_args():
 
     return parser.parse_args()
 
-# contriever / minilm / mpnet
 
 def main(args):
-    build_start = time.time()
 
     emb_dir = os.path.join(current_dir, "logs", "process_embs")
     emb_path = os.path.join(emb_dir, f"{args.dataset}-{args.retriever}-emb.pt")
@@ -61,9 +58,6 @@ def main(args):
             start_idx += num_turns
         conv_turn_embeddings[conv_id] = torch.stack(turn_embeddings)
 
-    build_time = time.time() - build_start
-
-    retrieval_start = time.time()
 
     results = []
     for entry, emb in zip(in_data, all_emb):
@@ -80,12 +74,10 @@ def main(args):
                 rankings = scores.argsort(descending=True)
             
             elif args.method == 'turn_level':
-                # turn agg 把每个seesion内所有tune合并平均为一个向量，得到所有session向量，再做余弦相似度,排序session分数
                 scores = (q_emb @ turn_embeddings.T).squeeze()
                 rankings = scores.argsort(descending=True)
             
             elif args.method == 'argmax':
-                # Each session's score = sum of its top-K turn scores (K=1 reduces to argmax/max)
                 scores = (q_emb @ emb['turns'].T).squeeze()
 
                 n_sessions = len(turn_num_each_session)
@@ -125,7 +117,6 @@ def main(args):
                 }
             }
 
-            # 7. 计算评价指标：Recall 和 NDCG
             if args.dataset != "LongMTBench+":
                 # for k in [1, 3, 5, 10, 30, 50]:
                 for k in [3, 5, 10]:
@@ -137,7 +128,6 @@ def main(args):
                     })
             results.append(cur_results)
 
-    retrieval_time = time.time() - retrieval_start
 
     if args.dataset != "LongMTBench+":
         refine_results = []
@@ -155,9 +145,6 @@ def main(args):
     for entry in results:
         print(json.dumps(entry), file=out_f)
     out_f.close()
-
-    print(f'\n===== Build time: {build_time:.2f}s =====')
-    print(f'===== Retrieval time: {retrieval_time:.2f}s =====')
 
 
 if __name__ == '__main__':
