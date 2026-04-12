@@ -1,16 +1,14 @@
-import argparse
-import json
 import os
 import sys
-from tqdm import tqdm
-script_dir = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.abspath(os.path.join(script_dir, "../")))
-from evaluation.generation.metrics import evaluate_match, evaluate_sim
-from async_llm import run_async
+import json
+import argparse
 import asyncio
 import aiohttp
-import tiktoken
-import time
+from tqdm import tqdm
+from async_llm import run_async
+from evaluation.generation.metrics import evaluate_match, evaluate_sim
+script_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.abspath(os.path.join(script_dir, "../")))
 
 
 PROMPT_G = """
@@ -22,9 +20,6 @@ Question Date: {question_date}
 Question: {question}
 """
 
-
-# locomo10 longmemeval_s longmemeval_m LongMTBench+
-# python gen.py --dataset LongMTBench+ --retriever contriever --model_name_or_path gpt-4o-mini-2024-07-18 --topk 3 --method argmax
 
 parser = argparse.ArgumentParser(description="long-term conversation evaluation")
 parser.add_argument('--dataset', type=str, required=True)
@@ -47,12 +42,10 @@ with open(retrieval_path, "r", encoding="utf-8") as f:
 data_path = os.path.join(script_dir, f'../data/process_data/{args.dataset}.json')
 in_data = json.load(open(data_path, encoding="utf-8"))
 
-################ session based
 conv2sessions = {}
 for entry in in_data:
     ids2session = {k:v for k,v in zip(entry['sessions_ids'],entry['sessions'])}
     conv2sessions[entry['conversation_id']] = ids2session
-################
 
 
 PROMPT_P = """
@@ -70,16 +63,12 @@ Question: {question}
 Answer:
 """
 
-generation_start = time.time()
-encoding = tiktoken.get_encoding("cl100k_base")
-prompt_token_counts = []
 async_prompts = []
 
 for idx, sample in enumerate(tqdm(retrieved_data)):
     conv_id = sample["conversation_id"]
     ids2session = conv2sessions[conv_id]
 
-    # Build retrieved_texts with original sessions
     retrieved_texts = ""
     for retrieved_sess in sample['retrieval_results']['ranked_items'][:args.topk]:
         session = ids2session[retrieved_sess['corpus_id']]
@@ -87,17 +76,14 @@ for idx, sample in enumerate(tqdm(retrieved_data)):
 
     prompt = PROMPT_P.format(fused_event=retrieved_texts, question=sample["question"], question_date=sample["question_date"])
     async_prompts.append(prompt)
-    prompt_token_counts.append(len(encoding.encode(prompt)))
 
 async_responses = asyncio.run(run_async(async_prompts))
 async_prompts = []
 
 for idx, sample in enumerate(tqdm(retrieved_data)):
-    # 第一轮 LLM 已经把 topk 个 session 过滤整合，直接使用其输出
     filtered_content = async_responses[idx]
     prompt = PROMPT_G.format(retrieved_texts=filtered_content, question=sample["question"], question_date=sample["question_date"])
     async_prompts.append(prompt)
-    prompt_token_counts.append(len(encoding.encode(prompt)))
 
 async_responses = asyncio.run(run_async(async_prompts))
 
@@ -107,8 +93,6 @@ for sample, response in zip(retrieved_data, async_responses):
     results.append(sample)
 with open(save_path, "w", encoding="utf-8") as f:
     f.writelines([json.dumps(_, ensure_ascii=False) + "\n" for _ in results])
-
-generation_time = time.time() - generation_start
 
 def get_answer(ans):
     strip_word_list = [
@@ -144,9 +128,6 @@ for res in results:
 
 metrics = evaluate_sim(pred_all, answer_all, truncate_pred=False)
 metrics.update(evaluate_match(pred_all, answer_all, truncate_pred=False))
-
-metrics["Avg.Token"] = round(sum(prompt_token_counts) / len(prompt_token_counts), 2)
-metrics["Generation.Time"] = round(generation_time, 2)
 
 
 print(metrics)
