@@ -43,7 +43,7 @@ We evaluate our method on four publicly available long-context conversation benc
 
 ## Experiments
 
-### Memory Retrieval(TIR)
+### Memory Retrieval (TIR)
 
 ```bash
 python3 emb.py
@@ -58,7 +58,7 @@ Change the --dataset parameter to  `locomo10` `longmemeval_s` `longmemeval_m` `L
 Change the --retriever parameter to  `contriever` `mpnet` `minilm` for experiments on other retrievers.
 
 
-### Memory Generation
+### Memory Generation  (DQR)
 
 To conduct QA experiements in Tab.1, run:
 
