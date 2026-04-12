@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 def process_longmemeval_s():
 
-    in_data = json.load(open('origin_data/longmemeval_s.json'))
+    in_data = json.load(open('data/unprocess/longmemeval_s.json'))
     alldata = []
 
     for entry in tqdm(in_data):
@@ -62,7 +62,7 @@ def process_longmemeval_s():
 
 def process_longmemeval_m():
 
-    in_data = json.load(open('origin_data/longmemeval_m.json'))
+    in_data = json.load(open('data/unprocess/longmemeval_m.json'))
     alldata = []
 
     for entry in tqdm(in_data):
@@ -116,7 +116,7 @@ def process_longmemeval_m():
         json.dump(alldata, f, ensure_ascii=False, indent=4)
 
 def process_locomo10():
-    in_data = json.load(open('origin_data/locomo10.json'))
+    in_data = json.load(open('data/unprocess/locomo10.json'))
 
     alldata = []
 
@@ -202,7 +202,7 @@ def convert_numpy_types(obj):
         return obj
 
 def process_LongMTBench_plus():
-    parquet_path = 'origin_data/test-00000-of-00001.parquet'
+    parquet_path = 'data/unprocess/test-00000-of-00001.parquet'
     df = pd.read_parquet(parquet_path)
     
     # Convert DataFrame to list of dictionaries and handle numpy types
