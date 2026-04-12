@@ -30,12 +30,10 @@ def evaluate_retrieval(rankings, correct_docs, corpus_ids, k=10):
 
 
 def evaluate_retrieval_turn2session(rankings, correct_docs, corpus_ids, k=10):
-    # convert turn-level labels/results into session-level and then evaluate
     def strip_turn_id(docid):
         return '_'.join(docid.split('_')[:-1])
     correct_docs = list(set([strip_turn_id(x) for x in correct_docs]))
 
-    # revise k to handle document-level retrieval
     corpus_ids = [strip_turn_id(x) for x in corpus_ids]
     effective_k = k
     unique_docids = set(corpus_ids[idx] for idx in rankings[:effective_k])
